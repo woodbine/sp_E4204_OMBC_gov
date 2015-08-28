@@ -63,7 +63,7 @@ def convert_mth_strings ( mth_string ):
     return mth_string
 # pull down the content from the webpage
 html = urllib2.urlopen(url)
-soup = BeautifulSoup(html)
+soup = BeautifulSoup(html, 'lxml')
 # find all entries with the required class
 block = soup.find('div', 'widget_content byEditor')
 links = block.find_all('a')
@@ -73,7 +73,7 @@ for link in links:
         url_link = 'http://www.oldham.gov.uk' + url_link
         csvfiles_html = urllib2.urlopen(url_link)
     csvfiles_html = urllib2.urlopen(url_link)
-    sp = BeautifulSoup(csvfiles_html)
+    sp = BeautifulSoup(csvfiles_html, 'lxml')
     blocks_download = sp.find_all('a')
     for block_download in blocks_download:
         if 'CSV' in block_download.text:
