@@ -106,15 +106,41 @@ for link in links:
     if 'http://' not in url_link:
         url_link = 'http://www.oldham.gov.uk' + url_link
         csvfiles_html = urllib2.urlopen(url_link)
-    csvfiles_html = urllib2.urlopen(url_link)
-    sp = BeautifulSoup(csvfiles_html, 'lxml')
-    blocks_download = sp.find_all('a')
-    for block_download in blocks_download:
-        if 'CSV' in block_download.text:
-            csvfiles = urllib2.urlopen(block_download['href'])
-            spcsv = BeautifulSoup(csvfiles, 'lxml')
-            url = spcsv.find('h3', 'downloadNow').a['href']
-            csvfile = spcsv.find('div', attrs={'id':'main'}).h1.text
+    if '/downloads/' in url_link:
+        csvfiles_html = urllib2.urlopen(url_link)
+        sp = BeautifulSoup(csvfiles_html, 'lxml')
+        csv_download = None
+        try:
+            csv_download = sp.find('div', 'popular-list downloads-list').find('span', text=re.compile("CSV"))
+        except:
+            pass
+        xls_download = None
+        if not csv_download:
+            try:
+                xls_download = sp.find('div', 'popular-list downloads-list').find('span', text=re.compile("XLS"))
+            except:
+                pass
+        if csv_download:
+                    csvfiles = urllib2.urlopen(csv_download.find_previous('a')['href'])
+                    spcsv = BeautifulSoup(csvfiles, 'lxml')
+                    url = spcsv.find('h3', 'downloadNow').a['href']
+                    csvfile = spcsv.find('div', attrs={'id':'main'}).h1.text
+                    csvMth = csvfile.split(' ')[0].strip()[:3]
+                    csvYr = csvfile.split(' ')[1].strip()
+                    csvMth = convert_mth_strings(csvMth.upper())
+                    data.append([csvYr, csvMth, url])
+        elif xls_download:
+                    csvfiles = urllib2.urlopen(xls_download.find_previous('a')['href'])
+                    spcsv = BeautifulSoup(csvfiles, 'lxml')
+                    url = spcsv.find('h3', 'downloadNow').a['href']
+                    csvfile = spcsv.find('div', attrs={'id':'main'}).h1.text
+                    csvMth = csvfile.split(' ')[0].strip()[:3]
+                    csvYr = csvfile.split(' ')[1].strip()
+                    csvMth = convert_mth_strings(csvMth.upper())
+                    data.append([csvYr, csvMth, url])
+        if 'february_2017' in url_link:
+            url = sp.find('h3', 'downloadNow').find('a')['href']
+            csvfile = sp.find('div', attrs={'id': 'main'}).h1.text
             csvMth = csvfile.split(' ')[0].strip()[:3]
             csvYr = csvfile.split(' ')[1].strip()
             csvMth = convert_mth_strings(csvMth.upper())
@@ -142,4 +168,3 @@ if errors > 0:
 
 
 #### EOF
-
